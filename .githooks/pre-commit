@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# 提交前检查:格式 + 快速静态分析。启用方式:git config core.hooksPath .githooks
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+if ! git diff --cached --name-only | grep -qE '\.java$|pom\.xml$'; then
+  exit 0
+fi
+
+echo "[pre-commit] spotless:check"
+if ! mvn -q spotless:check; then
+  echo "[pre-commit] 格式不合规,请先执行: mvn spotless:apply" >&2
+  exit 1
+fi
+
+echo "[pre-commit] spotbugs(含 Find Security Bugs)"
+mvn -q -DskipTests compile spotbugs:check

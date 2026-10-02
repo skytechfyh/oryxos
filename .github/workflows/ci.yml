@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      # 依次执行:测试 → spotless:check → checkstyle → pmd(P3C) → spotbugs(+FindSecBugs)
+      - name: 构建、测试与代码检查
+        run: mvn -B verify
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: depcheck-${{ github.run_id }}
+          restore-keys: depcheck-
+      # 扫描第三方依赖已知 CVE,CVSS >= 7 即失败。NVD_API_KEY 在仓库 Secrets 中配置。
+      - name: OWASP Dependency-Check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: mvn -B -DskipTests -Psecurity verify
