@@ -36,6 +36,8 @@ management:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+    # springdoc 内置了 swagger-ui 版本号,覆盖 webjar 时必须同步修改;值取自父 pom 的 swagger-ui.version
+    version: "@swagger-ui.version@"
   api-docs:
     path: /v3/api-docs
 

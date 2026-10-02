@@ -19,6 +19,7 @@
 | Dependency-Check 报 Invalid API Key | 13.x 强制要求 NVD API key | 申请免费 key,设环境变量 `NVD_API_KEY`;CI 放 Secrets |
 | Dependency-Check 扫出 Boot 传递依赖的高危 CVE | Boot BOM 版本滞后;BOM 以 import 引入时 `tomcat.version` 等属性覆盖**无效** | 在 `dependencyManagement` 中**先于 BOM** 显式声明 tomcat-embed-*、log4j-* 新版本 |
 | spring-core 6.2.x 有无开源修复的 CVE | Spring Framework 6.2 于 2026-06-30 结束开源支持,修复仅商业订阅或 7.0.9+(Boot 4.x) | 保持 Boot 3.x 时逐条评估可达性,写入 `config/dependency-check-suppressions.xml`:注明理由、`until` 过期日、绑定具体版本 |
+| 扫出 swagger-ui 内含的 DOMPurify CVE(显示 5.1 却仍失败) | 失败门槛按 CVSS 3.1(7.2)判断,日志显示的是 4.0 分数;springdoc 自带的 swagger-ui webjar 版本偏旧 | `dependencyManagement` 中覆盖 `org.webjars:swagger-ui`;**必须同步设置 `springdoc.swagger-ui.version`**(springdoc 内置了旧版本号,否则 `/swagger-ui/**` 404),可对 `application*.yaml` 开启资源过滤用 `@swagger-ui.version@` 取父 pom 属性。升级前先下载 jar 核对内含 DOMPurify 版本 |
 | macOS `sed -i` 报 invalid command code | BSD sed 需要 `-i ''`,且不支持 `\n` 替换 | 用 Python 做多行替换 |
 
 非 git 仓库时 `git commit` 需先 `git init`;提交作者缺失时用 `-c user.name/user.email`。
