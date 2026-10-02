@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: oryxos
+  threads:
+    virtual:
+      enabled: true # JDK 21 虚拟线程
+  datasource:
+    url: jdbc:sqlite:${ORYXOS_DB_PATH:./oryxos.db}
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 1 # SQLite 单写
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+
+server:
+  port: ${ORYXOS_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: oryxos
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+# 敏感配置一律通过环境变量注入,例如:
+# oryxos.provider.api-key: ${ORYXOS_PROVIDER_API_KEY}

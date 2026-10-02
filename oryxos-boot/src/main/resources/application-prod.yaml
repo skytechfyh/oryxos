@@ -1,0 +1,3 @@
+spring:
+  main:
+    banner-mode: off # 生产环境保持日志纯 JSON

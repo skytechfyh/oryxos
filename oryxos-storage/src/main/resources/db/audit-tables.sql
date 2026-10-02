@@ -1,0 +1,4 @@
+-- 审计表建表脚本预留位(day one 落库)。
+-- 待 Spec-Kit 业务设计确定字段后,在此补充:
+--   tool_invocations : 工具调用审计
+--   llm_calls        : 大模型调用审计
