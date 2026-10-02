@@ -17,6 +17,8 @@
 | `@SpringBootTest` 下 `/actuator/prometheus` 404 | 测试默认关闭指标导出 | 测试类加 `@AutoConfigureObservability` |
 | 未知路径返回 500 | 缺 `NoResourceFoundException` 处理;405/415 同理 | 处理 404 与 `HttpRequestMethodNotSupported` 等框架 4xx,保留原状态码 |
 | Dependency-Check 报 Invalid API Key | 13.x 强制要求 NVD API key | 申请免费 key,设环境变量 `NVD_API_KEY`;CI 放 Secrets |
+| Dependency-Check 扫出 Boot 传递依赖的高危 CVE | Boot BOM 版本滞后;BOM 以 import 引入时 `tomcat.version` 等属性覆盖**无效** | 在 `dependencyManagement` 中**先于 BOM** 显式声明 tomcat-embed-*、log4j-* 新版本 |
+| spring-core 6.2.x 有无开源修复的 CVE | Spring Framework 6.2 于 2026-06-30 结束开源支持,修复仅商业订阅或 7.0.9+(Boot 4.x) | 保持 Boot 3.x 时逐条评估可达性,写入 `config/dependency-check-suppressions.xml`:注明理由、`until` 过期日、绑定具体版本 |
 | macOS `sed -i` 报 invalid command code | BSD sed 需要 `-i ''`,且不支持 `\n` 替换 | 用 Python 做多行替换 |
 
 非 git 仓库时 `git commit` 需先 `git init`;提交作者缺失时用 `-c user.name/user.email`。
@@ -109,7 +111,7 @@ management:
 
 ## OWASP Dependency-Check
 
-使用 `org.owasp:dependency-check-maven` 的 `aggregate` 目标,放在 `security` profile 中,配置 `failBuildOnCVSS`(如 7)与 `nvdApiKeyEnvironmentVariable=NVD_API_KEY`。**13.x 必须提供 NVD API key,否则报 `Invalid API Key`**(本地未验证通过,需配 key 后确认)。首次需下载 NVD 库,耗时长,故不放进日常 `verify`,由 CI 用 `-Psecurity` 执行。
+使用 `org.owasp:dependency-check-maven` 的 `aggregate` 目标,放在 `security` profile 中,配置 `failBuildOnCVSS`(如 7)与 `nvdApiKeyEnvironmentVariable=NVD_API_KEY`。**13.x 必须提供 NVD API key,否则报 `Invalid API Key`**(已在 GitHub Actions 验证:key 有效、可完成扫描)。首次需下载 NVD 库,耗时长,故不放进日常 `verify`,由 CI 用 `-Psecurity` 执行。
 
 ## CI 顺序
 
