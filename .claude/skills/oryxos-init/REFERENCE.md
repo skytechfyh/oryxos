@@ -25,6 +25,7 @@
 | clone 后 IDEA 工程打不开 | 只提交了部分 `.idea/`,`modules.xml` 引用的 `.iml` 被忽略 | 整个 `.idea/` 不入库,从 pom 导入 |
 | 运行时文件被提交 | `.claude/scheduled_tasks.lock` 等由 Claude Code 生成 | `.gitignore` 中忽略 |
 | 依赖选版本时漏掉安全修复版 | 只看了常规版本号,忽略带 `-security-fix`/`-cve` 后缀的版本 | 查 maven-metadata 时列出全部版本,优先选安全修复版 |
+| 独立管理端口后测试访问不到 Actuator、traceId 测试失败 | Actuator 运行在独立子容器,端口不同,业务端口的 Filter 不作用于它 | 测试用 `@LocalManagementPort` 拼 URL;traceId 改用业务端口路径验证;并断言业务端口上 `/actuator/**` 为 404 |
 | macOS `sed -i` 报 invalid command code | BSD sed 需要 `-i ''`,且不支持 `\n` 替换 | 用 Python 做多行替换 |
 
 非 git 仓库时 `git commit` 需先 `git init`;提交作者缺失时用 `-c user.name/user.email`。
@@ -35,6 +36,9 @@
 server.port: 8080
 spring.threads.virtual.enabled: true   # JDK 21 虚拟线程
 management:
+  server:
+    port: ${ORYXOS_MANAGEMENT_PORT:8081}         # 独立管理端口
+    address: ${ORYXOS_MANAGEMENT_ADDRESS:127.0.0.1}  # 默认仅本机可访问
   endpoints.web.exposure.include: health,info,prometheus,metrics
   endpoint.health.probes.enabled: true
   metrics.tags.application: oryxos

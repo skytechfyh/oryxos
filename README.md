@@ -23,11 +23,18 @@ java -jar ... --spring.profiles.active=prod   # JSON 日志
 
 | 地址 | 说明 |
 | --- | --- |
-| `/actuator/health` | 健康检查 |
-| `/actuator/prometheus` | Prometheus 指标 |
-| `/swagger-ui.html` | API 文档 |
+| `http://localhost:8080/swagger-ui.html` | API 文档(业务端口) |
+| `http://127.0.0.1:8081/actuator/health` | 健康检查(管理端口) |
+| `http://127.0.0.1:8081/actuator/prometheus` | Prometheus 指标(管理端口) |
 
-环境变量:`ORYXOS_PORT`(默认 8080)、`ORYXOS_DB_PATH`(默认 `./oryxos.db`)。敏感配置一律走环境变量,不入库。
+Actuator 使用独立管理端口,且默认只监听 `127.0.0.1`,业务端口上访问不到。
+
+| 环境变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `ORYXOS_PORT` | `8080` | 业务端口 |
+| `ORYXOS_MANAGEMENT_PORT` | `8081` | Actuator 管理端口 |
+| `ORYXOS_MANAGEMENT_ADDRESS` | `127.0.0.1` | 管理端口监听地址。容器部署、需要 Prometheus 跨主机抓取时设为 `0.0.0.0`,并用网络策略限制来源 |
+| `ORYXOS_DB_PATH` | `./oryxos.db` | SQLite 文件路径 |敏感配置一律走环境变量,不入库。
 
 ## 代码规范与安全检查
 
