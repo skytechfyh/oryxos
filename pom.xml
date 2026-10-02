@@ -40,6 +40,17 @@
     <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
+
+    <spotless.version>3.10.3</spotless.version>
+    <checkstyle-plugin.version>3.6.0</checkstyle-plugin.version>
+    <checkstyle.version>10.26.1</checkstyle.version>
+    <!-- P3C 2.1.1 基于 PMD 6,故 PMD 插件固定在 PMD 6 系列 -->
+    <pmd-plugin.version>3.21.2</pmd-plugin.version>
+    <pmd.version>6.55.0</pmd.version>
+    <p3c.version>2.1.1</p3c.version>
+    <spotbugs-plugin.version>4.9.8.5</spotbugs-plugin.version>
+    <findsecbugs.version>1.14.0</findsecbugs.version>
+    <dependency-check.version>13.0.0</dependency-check.version>
   </properties>
 
   <dependencyManagement>
@@ -126,6 +137,126 @@
           <parameters>true</parameters>
         </configuration>
       </plugin>
+      <!-- 代码规范与安全检查,均绑定在 verify 阶段,按声明顺序执行 -->
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <configuration>
+          <java>
+            <googleJavaFormat><style>GOOGLE</style></googleJavaFormat>
+            <removeUnusedImports/>
+            <importOrder/>
+          </java>
+        </configuration>
+        <executions>
+          <execution><goals><goal>check</goal></goals></execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle-plugin.version}</version>
+        <configuration>
+          <configLocation>${maven.multiModuleProjectDirectory}/config/checkstyle.xml</configLocation>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <violationSeverity>warning</violationSeverity>
+          <failOnViolation>true</failOnViolation>
+          <consoleOutput>true</consoleOutput>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${checkstyle.version}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution><goals><goal>check</goal></goals></execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${pmd-plugin.version}</version>
+        <configuration>
+          <targetJdk>17</targetJdk> <!-- PMD 6 暂不识别 Java 21 语法级别 -->
+          <!-- PMD 6 的 ASM 读不了 Java 21 class 文件(major 65),关闭类型解析,仅做源码层匹配 -->
+          <typeResolution>false</typeResolution>
+          <!-- 文件处理出错必须使构建失败,否则规则会被静默跳过 -->
+          <skipPmdError>false</skipPmdError>
+          <printFailingErrors>true</printFailingErrors>
+          <rulesets>
+            <ruleset>${maven.multiModuleProjectDirectory}/config/pmd-ruleset.xml</ruleset>
+          </rulesets>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>com.alibaba.p3c</groupId>
+            <artifactId>p3c-pmd</artifactId>
+            <version>${p3c.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>net.sourceforge.pmd</groupId>
+            <artifactId>pmd-core</artifactId>
+            <version>${pmd.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>net.sourceforge.pmd</groupId>
+            <artifactId>pmd-java</artifactId>
+            <version>${pmd.version}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution><goals><goal>check</goal></goals></execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>${spotbugs-plugin.version}</version>
+        <configuration>
+          <excludeFilterFile>${maven.multiModuleProjectDirectory}/config/spotbugs-exclude.xml</excludeFilterFile>
+          <effort>Max</effort>
+          <threshold>Low</threshold>
+          <plugins>
+            <plugin>
+              <groupId>com.h3xstream.findsecbugs</groupId>
+              <artifactId>findsecbugs-plugin</artifactId>
+              <version>${findsecbugs.version}</version>
+            </plugin>
+          </plugins>
+        </configuration>
+        <executions>
+          <execution><goals><goal>check</goal></goals></execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
+  <profiles>
+    <!--
+      OWASP Dependency-Check:扫描第三方依赖的已知 CVE。
+      首次运行需下载 NVD 漏洞库(耗时较长),因此不放进日常 verify,由 CI 通过 -Psecurity 启用。
+      建议配置环境变量 NVD_API_KEY 以提升下载速度。
+    -->
+    <profile>
+      <id>security</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.owasp</groupId>
+            <artifactId>dependency-check-maven</artifactId>
+            <version>${dependency-check.version}</version>
+            <configuration>
+              <failBuildOnCVSS>7</failBuildOnCVSS>
+              <nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
+            </configuration>
+            <executions>
+              <execution><goals><goal>aggregate</goal></goals></execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

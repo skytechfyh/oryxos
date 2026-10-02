@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="oryxos-p3c"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+  <description>OryxOS 采用的阿里巴巴 P3C 规约。每条排除都必须写明理由。</description>
+
+  <rule ref="rulesets/java/ali-comment.xml">
+    <!-- 作者信息由 git 记录,不在代码里维护 @author -->
+    <exclude name="ClassMustHaveAuthorRule"/>
+  </rule>
+  <rule ref="rulesets/java/ali-concurrent.xml"/>
+  <rule ref="rulesets/java/ali-constant.xml"/>
+  <rule ref="rulesets/java/ali-exception.xml"/>
+  <rule ref="rulesets/java/ali-flowcontrol.xml"/>
+  <rule ref="rulesets/java/ali-naming.xml"/>
+  <rule ref="rulesets/java/ali-oop.xml"/>
+  <rule ref="rulesets/java/ali-orm.xml"/>
+  <rule ref="rulesets/java/ali-other.xml"/>
+  <rule ref="rulesets/java/ali-set.xml"/>
+</ruleset>

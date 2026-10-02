@@ -5,6 +5,7 @@ import io.oryxos.core.ErrorCode;
 import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -23,12 +24,15 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  /** 5xx 状态码下限,达到该值按错误级别记录日志。 */
+  private static final int SERVER_ERROR_MIN_STATUS = 500;
+
   private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(BizException.class)
   public ResponseEntity<ErrorResponse> handleBiz(BizException e) {
     ErrorCode code = e.getErrorCode();
-    if (code.httpStatus() >= 500) {
+    if (code.httpStatus() >= SERVER_ERROR_MIN_STATUS) {
       LOG.error("业务异常: {}", e.getMessage(), e);
     } else {
       LOG.warn("业务异常: {}", e.getMessage());
@@ -59,7 +63,10 @@ public class GlobalExceptionHandler {
     HttpMediaTypeNotAcceptableException.class
   })
   public ResponseEntity<ErrorResponse> handleFrameworkClientError(Exception e) {
-    HttpStatusCode status = ((org.springframework.web.ErrorResponse) e).getStatusCode();
+    HttpStatusCode status =
+        e instanceof org.springframework.web.ErrorResponse er
+            ? er.getStatusCode()
+            : HttpStatus.BAD_REQUEST;
     LOG.warn("请求不被支持: {}", e.getMessage());
     return ResponseEntity.status(status)
         .body(new ErrorResponse("ORYX-" + status.value(), e.getMessage(), Instant.now()));

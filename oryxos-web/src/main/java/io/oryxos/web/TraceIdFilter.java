@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -20,12 +21,15 @@ public class TraceIdFilter extends OncePerRequestFilter {
   public static final String HEADER = "X-Trace-Id";
   public static final String MDC_KEY = "traceId";
 
+  /** 白名单校验,拒绝包含换行等控制字符的外部输入。 */
+  private static final Pattern VALID_TRACE_ID = Pattern.compile("[A-Za-z0-9-]{1,64}");
+
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
     String traceId = request.getHeader(HEADER);
-    if (traceId == null || traceId.isBlank() || traceId.length() > 64) {
+    if (traceId == null || !VALID_TRACE_ID.matcher(traceId).matches()) {
       traceId = UUID.randomUUID().toString().replace("-", "");
     }
     MDC.put(MDC_KEY, traceId);

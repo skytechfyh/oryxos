@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 每条排除都必须写明理由,新增前需评审。 -->
+<FindBugsFilter>
+  <!-- 生产环境日志经 LogstashEncoder 输出 JSON,换行符会被转义,不存在日志注入。 -->
+  <Match>
+    <Bug pattern="CRLF_INJECTION_LOGS"/>
+  </Match>
+  <!-- traceId 来自请求头,但已用白名单正则 [A-Za-z0-9-]{1,64} 校验后才写入响应头。 -->
+  <Match>
+    <Class name="io.oryxos.web.TraceIdFilter"/>
+    <Bug pattern="HRS_REQUEST_PARAMETER_TO_HTTP_HEADER,SERVLET_HEADER"/>
+  </Match>
+</FindBugsFilter>
