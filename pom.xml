@@ -28,6 +28,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <spring-boot.version>3.5.16</spring-boot.version>
+    <!-- 覆盖 Boot BOM 自带的有漏洞版本;BOM 以 import 引入,属性覆盖无效,须在其前显式声明 -->
+    <tomcat.version>10.1.60</tomcat.version>
+    <log4j2.version>2.26.1</log4j2.version>
     <spring-ai-alibaba.version>1.1.2.3</spring-ai-alibaba.version>
     <sqlite-jdbc.version>3.53.4.0</sqlite-jdbc.version>
     <picocli.version>4.7.7</picocli.version>
@@ -55,6 +58,12 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- 安全升级:必须声明在 spring-boot-dependencies 之前,先声明者优先 -->
+      <dependency><groupId>org.apache.tomcat.embed</groupId><artifactId>tomcat-embed-core</artifactId><version>${tomcat.version}</version></dependency>
+      <dependency><groupId>org.apache.tomcat.embed</groupId><artifactId>tomcat-embed-el</artifactId><version>${tomcat.version}</version></dependency>
+      <dependency><groupId>org.apache.tomcat.embed</groupId><artifactId>tomcat-embed-websocket</artifactId><version>${tomcat.version}</version></dependency>
+      <dependency><groupId>org.apache.logging.log4j</groupId><artifactId>log4j-api</artifactId><version>${log4j2.version}</version></dependency>
+      <dependency><groupId>org.apache.logging.log4j</groupId><artifactId>log4j-to-slf4j</artifactId><version>${log4j2.version}</version></dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
