@@ -37,6 +37,6 @@ java -jar ... --spring.profiles.active=prod   # JSON 日志
 2. **Checkstyle** — `config/checkstyle.xml`(基于 google_checks,去掉不适合中文注释的两条)
 3. **PMD + 阿里 P3C** — `config/pmd-ruleset.xml`
 4. **SpotBugs + Find Security Bugs** — 排除项见 `config/spotbugs-exclude.xml`(每条须写理由)
-5. **OWASP Dependency-Check** — 需 `-Psecurity`,由 CI 执行;配置 `NVD_API_KEY` 可加速
+5. **OWASP Dependency-Check** — 需 `-Psecurity`,由 CI 执行;**必须**配置环境变量 `NVD_API_KEY`(免费申请),CI 中放入仓库 Secrets
 
 启用 pre-commit:`git config core.hooksPath .githooks`

@@ -237,7 +237,7 @@
     <!--
       OWASP Dependency-Check:扫描第三方依赖的已知 CVE。
       首次运行需下载 NVD 漏洞库(耗时较长),因此不放进日常 verify,由 CI 通过 -Psecurity 启用。
-      建议配置环境变量 NVD_API_KEY 以提升下载速度。
+      13.x 起必须配置环境变量 NVD_API_KEY(到 https://nvd.nist.gov/developers/request-an-api-key 免费申请),否则报 Invalid API Key。
     -->
     <profile>
       <id>security</id>

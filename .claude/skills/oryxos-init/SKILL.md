@@ -24,15 +24,15 @@ description: 初始化 OryxOS(或同类 JDK 21 + Spring Boot 3.x 企业级单体
 ## 步骤(每步完成后 `git commit`,当前若非 git 仓库先询问是否 `git init`)
 
 0. **确认参数**:groupId、根 artifactId、模块清单(默认 9 模块)、端口(默认 8080)、JDK(21)。
-1. **Maven 多模块骨架**:父 pom(packaging=pom)+ `oryxos-core / provider / memory / tool / web / storage / boot / cli / channel-cli`;`oryxos-boot` 含 `main`,打 fat JAR。
-2. **版本管理**:父 pom 的 `dependencyManagement` / `pluginManagement` 锁定 Spring Boot BOM、Spring AI Alibaba BOM、SQLite JDBC、Picocli、SnakeYAML、logstash-logback-encoder、springdoc。版本取实施时最新稳定版。
+1. **Maven 多模块骨架**:父 pom(packaging=pom)+ `oryxos-core / provider / memory / tool / web / storage / boot / cli / channel-cli`;`oryxos-boot` 含 `main`(`scanBasePackages="io.oryxos"`),打 fat JAR。带点的模块名(如 `channel-cli`)包目录要建成嵌套 `channel/cli/`,不要写成 `channel.cli/`。
+2. **版本管理**:父 pom 的 `dependencyManagement` / `pluginManagement` 锁定 Spring Boot BOM(用 `spring-boot-dependencies` import,不继承 starter-parent)、Spring AI Alibaba BOM、SQLite JDBC、Picocli、SnakeYAML、logstash-logback-encoder、springdoc。版本取实施时最新稳定版,**先用 `curl` 查 maven-metadata.xml 确认**。**必须显式锁定 compiler / surefire / jar / resources / install 插件版本**,否则 Maven 默认的 compiler 3.1 不认 `release=21`。
 3. **日志**:`logback-spring.xml`,dev 彩色 console,prod(profile)JSON + MDC `traceId`;禁止 `System.out`。
 4. **监控**:actuator + micrometer-registry-prometheus,暴露 health / info / prometheus / metrics。
 5. **HTTP**:spring-boot-starter-web,`spring.threads.virtual.enabled=true`。
 6. **API 规范**:springdoc;`oryxos-web` 内建 `ApiResponse<T>` 与 `GlobalExceptionHandler`(覆盖 400/404/500/503);REST 用 `/api/v1` 前缀、资源名词复数。
-7. **开发规范**:Spotless + google-java-format(格式)、阿里 P3C 挂 PMD(编码规约)、Checkstyle `google_checks.xml` + `.editorconfig`(兜底)。风格冲突以 google-java-format 为准。
-8. **安全检查**:SpotBugs + Find Security Bugs、PMD、OWASP Dependency-Check(设 `failBuildOnCVSS`)。
-9. **CI + pre-commit**:pre-commit 跑 `spotless:check`/`apply` + 快速 SpotBugs;GitHub Actions 跑 `mvn verify`,任一失败即阻断。
+7. **开发规范**:Spotless + google-java-format(格式)、阿里 P3C 挂 PMD(编码规约,**PMD 须固定 6.x**)、Checkstyle + `.editorconfig`(兜底)。自有规则文件放根目录 `config/`。风格冲突以 google-java-format 为准。**踩坑与对策见 [REFERENCE.md](REFERENCE.md) 的「已知坑」。**
+8. **安全检查**:SpotBugs + Find Security Bugs、OWASP Dependency-Check(放 `security` profile,由 CI 启用,设 `failBuildOnCVSS`)。排除项写进 `config/spotbugs-exclude.xml` 且必须注明理由,优先改代码而非排除。
+9. **CI + pre-commit**:钩子放 `.githooks/pre-commit`,用 `git config core.hooksPath .githooks` 启用;GitHub Actions 跑 `mvn verify` 与 `-Psecurity`,任一失败即阻断。
 10. **验证**:见下。
 
 ## 验证
@@ -40,7 +40,8 @@ description: 初始化 OryxOS(或同类 JDK 21 + Spring Boot 3.x 企业级单体
 - `mvn clean verify` 全绿,`mvn clean package` 产出 fat JAR
 - `mvn -pl oryxos-boot spring-boot:run` 能启动
 - `/actuator/health` 为 UP,`/actuator/prometheus` 有指标,`/swagger-ui.html` 可打开
-- 故意写不规范代码,`spotless:check` 应报错;引入有 CVE 的旧依赖,depcheck 应告警(验证后还原)
+- **负向验证(必做,"全绿"不等于检查生效)**:分别写一个格式错误、一个 `Executors.newFixedThreadPool`(P3C)、一个 `MessageDigest.getInstance("MD5")`(Find Security Bugs),确认各自被对应检查拦下,验证后删除
+- 故意提交不合规代码,确认 pre-commit 拦截
 
 ## 完成清单
 
@@ -48,7 +49,7 @@ description: 初始化 OryxOS(或同类 JDK 21 + Spring Boot 3.x 企业级单体
 - [ ] 结构化日志含 traceId,无 `System.out`
 - [ ] Actuator / Prometheus / 虚拟线程 / Swagger 可用
 - [ ] `ApiResponse` + `GlobalExceptionHandler` 就位
-- [ ] Spotless + P3C + Checkstyle + `.editorconfig` 生效
+- [ ] Spotless + P3C + Checkstyle + `.editorconfig` 生效(已做负向验证)
 - [ ] SpotBugs + FSB + PMD + Dependency-Check 接入 `mvn verify`
 - [ ] pre-commit + CI 跑通
 - [ ] 无明文密钥
