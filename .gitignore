@@ -1,8 +1,11 @@
 target/
 out/
 *.iml
-.idea/workspace.xml
-.idea/shelf/
+# IDE 配置由各人从 Maven 导入生成,不入库
+.idea/
+# Claude Code 运行时文件
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
 *.db
 *.db-journal
 .DS_Store

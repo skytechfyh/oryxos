@@ -33,7 +33,7 @@
     <log4j2.version>2.26.1</log4j2.version>
     <!-- springdoc 自带的 swagger-ui 5.32.2 内含 DOMPurify 3.3.2(CVE-2026-65898),5.32.15 内含 3.4.13 -->
     <swagger-ui.version>5.32.15</swagger-ui.version>
-    <spring-ai-alibaba.version>1.1.2.3</spring-ai-alibaba.version>
+    <spring-ai-alibaba.version>1.1.2.4-security-fix</spring-ai-alibaba.version>
     <sqlite-jdbc.version>3.53.4.0</sqlite-jdbc.version>
     <picocli.version>4.7.7</picocli.version>
     <snakeyaml.version>2.4</snakeyaml.version>
@@ -265,6 +265,8 @@
                 <suppressionFile>${maven.multiModuleProjectDirectory}/config/dependency-check-suppressions.xml</suppressionFile>
               </suppressionFiles>
               <nvdApiKeyEnvironmentVariable>NVD_API_KEY</nvdApiKeyEnvironmentVariable>
+              <!-- 显式指定漏洞库目录,便于 CI 独立缓存(不与 ~/.m2 缓存混在一起) -->
+              <dataDirectory>${user.home}/.cache/dependency-check</dataDirectory>
             </configuration>
             <executions>
               <execution><goals><goal>aggregate</goal></goals></execution>

@@ -20,6 +20,11 @@
 | Dependency-Check 扫出 Boot 传递依赖的高危 CVE | Boot BOM 版本滞后;BOM 以 import 引入时 `tomcat.version` 等属性覆盖**无效** | 在 `dependencyManagement` 中**先于 BOM** 显式声明 tomcat-embed-*、log4j-* 新版本 |
 | spring-core 6.2.x 有无开源修复的 CVE | Spring Framework 6.2 于 2026-06-30 结束开源支持,修复仅商业订阅或 7.0.9+(Boot 4.x) | 保持 Boot 3.x 时逐条评估可达性,写入 `config/dependency-check-suppressions.xml`:注明理由、`until` 过期日、绑定具体版本 |
 | 扫出 swagger-ui 内含的 DOMPurify CVE(显示 5.1 却仍失败) | 失败门槛按 CVSS 3.1(7.2)判断,日志显示的是 4.0 分数;springdoc 自带的 swagger-ui webjar 版本偏旧 | `dependencyManagement` 中覆盖 `org.webjars:swagger-ui`;**必须同步设置 `springdoc.swagger-ui.version`**(springdoc 内置了旧版本号,否则 `/swagger-ui/**` 404),可对 `application*.yaml` 开启资源过滤用 `@swagger-ui.version@` 取父 pom 属性。升级前先下载 jar 核对内含 DOMPurify 版本 |
+| 在子模块目录构建报找不到 `config/checkstyle.xml` | 根目录无 `.mvn/` 时 `maven.multiModuleProjectDirectory` 取当前目录 | 加 Maven Wrapper(自带 `.mvn/`),同时固定 Maven 版本 |
+| CI 的 dependency-check 每次都要 30 分钟 | `actions/cache` 只在任务成功时保存,扫出漏洞失败后缓存永远为空 | pom 中显式设 `dataDirectory`;CI 拆成 `cache/restore` 与 `cache/save`,保存步骤加 `if: always()` |
+| clone 后 IDEA 工程打不开 | 只提交了部分 `.idea/`,`modules.xml` 引用的 `.iml` 被忽略 | 整个 `.idea/` 不入库,从 pom 导入 |
+| 运行时文件被提交 | `.claude/scheduled_tasks.lock` 等由 Claude Code 生成 | `.gitignore` 中忽略 |
+| 依赖选版本时漏掉安全修复版 | 只看了常规版本号,忽略带 `-security-fix`/`-cve` 后缀的版本 | 查 maven-metadata 时列出全部版本,优先选安全修复版 |
 | macOS `sed -i` 报 invalid command code | BSD sed 需要 `-i ''`,且不支持 `\n` 替换 | 用 Python 做多行替换 |
 
 非 git 仓库时 `git commit` 需先 `git init`;提交作者缺失时用 `-c user.name/user.email`。
