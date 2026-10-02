@@ -1,0 +1,9 @@
+target/
+out/
+*.iml
+.idea/workspace.xml
+.idea/shelf/
+*.db
+*.db-journal
+.DS_Store
+.env
