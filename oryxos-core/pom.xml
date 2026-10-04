@@ -13,5 +13,8 @@
   <dependencies>
     <dependency><groupId>org.yaml</groupId><artifactId>snakeyaml</artifactId></dependency>
     <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId></dependency>
+    <!-- 只用 Prompt/ChatResponse/Message 等数据类型,不用任何 Agent 抽象;调用经 ChatGateway 由 provider 实现 -->
+    <dependency><groupId>org.springframework.ai</groupId><artifactId>spring-ai-model</artifactId></dependency>
+    <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
   </dependencies>
 </project>

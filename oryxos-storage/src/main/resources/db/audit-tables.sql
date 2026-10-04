@@ -1,4 +1,1 @@
--- 审计表建表脚本预留位(day one 落库)。
--- 待 Spec-Kit 业务设计确定字段后,在此补充:
---   tool_invocations : 工具调用审计
---   llm_calls        : 大模型调用审计
+-- 审计表建表脚本已并入 classpath:schema.sql(tool_invocations、llm_calls),本文件仅为历史预留位,不再维护。

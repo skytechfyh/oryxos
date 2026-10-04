@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import io.oryxos.core.profile.Profile;
 import io.oryxos.core.profile.Profile.ProviderRef;
 import io.oryxos.core.tool.OryxTool;
+import io.oryxos.core.tool.ToolResult;
 import io.oryxos.storage.LlmCall;
 import io.oryxos.storage.LlmCallRepository;
 import java.util.List;
@@ -44,6 +45,7 @@ class ProviderServiceTest {
   private ProviderService service;
   private final Prompt prompt = new Prompt("你好");
 
+  /** 准备审计仓库的 mock 与被测服务。 */
   @BeforeEach
   void setUp() {
     chatModel = mock(ChatModel.class);
@@ -52,6 +54,7 @@ class ProviderServiceTest {
     service = new ProviderService(Map.of("deepseek", chatModel), adapter, audit);
   }
 
+  /** 构造一个带文本的最小模型响应。 */
   private static ChatResponse response() {
     return ChatResponse.builder()
         .generations(List.of(new Generation(new AssistantMessage("你好,我是模型"))))
@@ -59,6 +62,7 @@ class ProviderServiceTest {
         .build();
   }
 
+  /** 构造引用指定 provider 的最小 Profile。 */
   private static Profile profileUsing(String provider) {
     return new Profile(
         "ops-agent",
@@ -75,6 +79,7 @@ class ProviderServiceTest {
         null);
   }
 
+  /** 构造一个 http_get 工具,用来验证工具 schema 随请求带上。 */
   private static OryxTool httpGetTool() {
     return new OryxTool() {
       @Override
@@ -91,9 +96,16 @@ class ProviderServiceTest {
       public String getInputSchema() {
         return "{\"type\":\"object\",\"properties\":{\"url\":{\"type\":\"string\"}}}";
       }
+
+      /** 本测试只验证 schema 翻译与路由,不会真正执行工具。 */
+      @Override
+      public ToolResult execute(String inputJson) {
+        return ToolResult.ok("");
+      }
     };
   }
 
+  /** 按 provider 名路由,两个 provider 互不串台。 */
   @Test
   @DisplayName("按名路由_两个provider不串台")
   void routesByNameWithoutCrossTalk() {
@@ -108,6 +120,7 @@ class ProviderServiceTest {
     verify(deepseek, never()).call(any(Prompt.class)); // deepseek 一次都没被碰——"不串台"的直接证据
   }
 
+  /** 引用未接入的 provider 时抛异常,且不发起任何调用。 */
   @Test
   @DisplayName("未知provider名_抛ProviderNotFoundException且不发起调用")
   void unknownProviderThrowsWithoutCalling() {
@@ -120,6 +133,7 @@ class ProviderServiceTest {
     verify(chatModel, never()).call(any(Prompt.class));
   }
 
+  /** 成功调用写一条带 token 用量的审计。 */
   @Test
   @DisplayName("调用成功_审计记录success为true且含token")
   void successfulCallIsAuditedWithTokens() {
@@ -141,6 +155,7 @@ class ProviderServiceTest {
     assertThat(usage.getValue().getTotalTokens()).isEqualTo(30);
   }
 
+  /** 失败调用同样留审计,success 为 false 并带原因。 */
   @Test
   @DisplayName("调用失败_审计必须留下success为false的记录")
   void failedCallLeavesAuditWithSuccessFalse() {
@@ -161,6 +176,7 @@ class ProviderServiceTest {
             anyLong()); // 但审计先落了:success=false + 原因
   }
 
+  /** 审计写入自身出错时,不能盖掉调用方真正的原始异常。 */
   @Test
   @DisplayName("审计写入自身失败_不掩盖原始调用异常")
   void auditFailureDoesNotMaskOriginalException() {
@@ -177,6 +193,7 @@ class ProviderServiceTest {
     assertThat(ex.getMessage()).isEqualTo("connect timeout");
   }
 
+  /** 带工具的请求必须关闭 Spring AI 自动工具执行,否则工具会被调两次。 */
   @Test
   @DisplayName("带工具schema调用_请求里关闭了自动执行")
   void toolCallRequestDisablesAutoExecution() {
@@ -193,6 +210,7 @@ class ProviderServiceTest {
     assertThat(options.getToolCallbacks().get(0).getToolDefinition().name()).isEqualTo("http_get");
   }
 
+  /** 不带工具的请求同样关闭自动工具执行。 */
   @Test
   @DisplayName("不带工具调用_同样关闭自动执行并带上profile的模型与温度")
   void callWithoutToolsAlsoDisablesAutoExecution() {

@@ -1,5 +1,6 @@
 package io.oryxos.provider;
 
+import io.oryxos.core.agent.ChatGateway;
 import io.oryxos.core.profile.Profile;
 import io.oryxos.core.tool.OryxTool;
 import java.util.List;
@@ -15,7 +16,7 @@ import org.springframework.ai.model.tool.ToolCallingChatOptions;
  *
  * <p>不管循环、不执行工具、不拼上下文;故障直接抛给上层,不做 fallback。
  */
-public class ProviderService {
+public class ProviderService implements ChatGateway {
 
   private final Map<String, ChatModel> providerMap;
   private final ToolSchemaAdapter adapter;
@@ -40,6 +41,7 @@ public class ProviderService {
    * @param availableTools 本次可用工具,只翻译成 schema 随请求带上;模型回的"想调工具"请求原样交回上层
    * @throws ProviderNotFoundException profile 引用的 provider 未接入
    */
+  @Override
   public ChatResponse chat(
       String sessionId, Profile profile, Prompt prompt, List<OryxTool> availableTools) {
     // 24 节接线:此处是涉外 IO,Sandbox 就位后在首行校验 HTTP 域名白名单
