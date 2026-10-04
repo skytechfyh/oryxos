@@ -1,0 +1,10 @@
+# 示例 Profile:一个 Agent 由一份 YAML 定义。凭证不写在这里,只引用全局层的 provider 名。
+name: ops-agent
+description: 运维助手
+identity:
+  agent_name: 小运
+  prompt: 你是一名运维助手,回答要简洁准确。
+provider:
+  name: deepseek # 必须能在 application.yaml 的 oryxos.providers 里找到同名项
+  model: deepseek-chat
+  temperature: 0.7

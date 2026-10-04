@@ -10,7 +10,29 @@
   </parent>
   <artifactId>oryxos-provider</artifactId>
   <name>oryxos-provider</name>
+  <properties>
+    <!-- 集成冒烟要真调模型,日常与 CI 跳过;手动跑时清空此属性并指定 -Dgroups=integration -->
+    <excluded.test.groups>integration</excluded.test.groups>
+  </properties>
   <dependencies>
     <dependency><groupId>io.oryxos</groupId><artifactId>oryxos-core</artifactId></dependency>
+    <!-- 审计写入 llm_calls 需要 LlmCallRepository -->
+    <dependency><groupId>io.oryxos</groupId><artifactId>oryxos-storage</artifactId></dependency>
+    <!-- Spring AI 仅用 Provider 抽象与协议转换;自动装配与自动工具执行均在 boot 配置中关闭 -->
+    <dependency><groupId>org.springframework.ai</groupId><artifactId>spring-ai-starter-model-openai</artifactId></dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>**/*Test.java</include>
+            <include>**/*IT.java</include>
+          </includes>
+          <excludedGroups>${excluded.test.groups}</excludedGroups>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

@@ -41,4 +41,21 @@
     <cve>CVE-2026-59283</cve>
     <cve>CVE-2026-59313</cve>
   </suppress>
+  <!--
+    Spring AI 1.1.8(1.1.x 已发布的最新版)仍受下列 CVE 影响,修复在 1.1.9(截至 2026-10-04 尚未发布到 Maven Central);
+    升 2.x 需 Spring Boot 4,违反 constitution。评估日期 2026-10-04,1.1.9 发布后须升级并删除本条。
+  -->
+  <suppress until="2026-11-15Z">
+    <notes><![CDATA[
+      - CVE-2026-59318  工具调用时未强制校验"本次请求的 tool 列表"边界 -> OryxOS 禁用 Spring AI 自动 tool 执行,
+                        tool 调度完全由 ReActLoop + ToolExecutor 完成并经 SandboxChecker 校验,不走该代码路径,不可达
+      - CVE-2026-47851  PDF TOC 嵌套/循环导致 StackOverflowError -> 未使用 spring-ai-pdf-document-reader / ETL 摄取,不可达
+      - CVE-2026-47852  ONNX 模型缓存路径可被本地预置恶意文件 -> 未使用 ONNX/本地 Transformers 嵌入,不可达
+      【风险点】若后续启用 Spring AI 自动 tool 执行、PDF 摄取或 ONNX 嵌入,须重新评估。
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.springframework\.ai/spring-ai-[a-z-]+@1\.1\.8$</packageUrl>
+    <cve>CVE-2026-59318</cve>
+    <cve>CVE-2026-47851</cve>
+    <cve>CVE-2026-47852</cve>
+  </suppress>
 </suppressions>
