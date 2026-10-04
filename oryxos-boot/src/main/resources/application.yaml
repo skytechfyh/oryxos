@@ -1,6 +1,15 @@
 spring:
   application:
     name: oryxos
+  autoconfigure:
+    # 禁用 Spring AI 的模型自动装配:无 API key 会阻断启动,且 provider 必须由 ProviderConfiguration 显式建表
+    exclude:
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiChatAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
   threads:
     virtual:
       enabled: true # JDK 21 虚拟线程
@@ -9,6 +18,11 @@ spring:
     driver-class-name: org.sqlite.JDBC
     hikari:
       maximum-pool-size: 1 # SQLite 单写
+  sql:
+    init:
+      # 表由手工维护的 schema.sql 创建(CREATE TABLE IF NOT EXISTS,可重复执行),不依赖 Hibernate 自动建表
+      mode: always
+      schema-locations: classpath:schema.sql
   jpa:
     open-in-view: false
     hibernate:
@@ -45,5 +59,16 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
-# 敏感配置一律通过环境变量注入,例如:
-# oryxos.provider.api-key: ${ORYXOS_PROVIDER_API_KEY}
+# 全局层:声明本实例接了哪些 provider、凭证从哪个环境变量读。
+# 用哪个 model、什么温度由各 Agent 的 Profile 决定。环境变量未设置时该 provider 被跳过并记错误日志,不阻断启动。
+# base-url 不含 /v1 后缀以外的路径,调用时拼接 /v1/chat/completions(OpenAI 兼容协议)。
+oryxos:
+  providers:
+    - name: deepseek
+      base-url: https://api.deepseek.com
+      api-key: ${DEEPSEEK_API_KEY:}
+    - name: kimi
+      base-url: https://api.moonshot.cn
+      api-key: ${KIMI_API_KEY:}
+
+# 敏感配置一律通过环境变量注入,不入库
