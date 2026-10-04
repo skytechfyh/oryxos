@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.oryxos.core.tool.OryxTool;
+import io.oryxos.core.tool.ToolResult;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ class ToolSchemaAdapterTest {
 
   private final ToolSchemaAdapter adapter = new ToolSchemaAdapter();
 
+  /** 构造一个只提供名称、说明与 schema 的测试工具。 */
   private static OryxTool tool(String name, String description, String schema) {
     return new OryxTool() {
       @Override
@@ -33,9 +35,16 @@ class ToolSchemaAdapterTest {
       public String getInputSchema() {
         return schema;
       }
+
+      /** 本测试只验证 schema 翻译与路由,不会真正执行工具。 */
+      @Override
+      public ToolResult execute(String inputJson) {
+        return ToolResult.ok("");
+      }
     };
   }
 
+  /** 翻译后的工具定义与原工具字段一一对齐。 */
   @Test
   @DisplayName("翻译后字段一一对齐")
   void translatedFieldsAlignOneToOne() {
@@ -51,6 +60,7 @@ class ToolSchemaAdapterTest {
     assertThat(result.get(1).getToolDefinition().name()).isEqualTo("read_file");
   }
 
+  /** 翻译出的 ToolCallback 拒绝执行:执行权只在 ToolExecutor。 */
   @Test
   @DisplayName("只翻译不执行_产物调用即拒绝")
   void translatedToolRefusesExecution() {
@@ -61,6 +71,7 @@ class ToolSchemaAdapterTest {
         .isInstanceOf(UnsupportedOperationException.class);
   }
 
+  /** 没有工具时翻译结果为空列表。 */
   @Test
   @DisplayName("空列表_返回空列表")
   void emptyListYieldsEmptyList() {
