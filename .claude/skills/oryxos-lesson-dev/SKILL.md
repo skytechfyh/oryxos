@@ -102,7 +102,7 @@ $ARGUMENTS
 
 ## 第 4 步：组装并执行 /speckit-plan
 
-参数 = 固定技术栈句 + 本节模块落位 + 测试策略句 + 语法禁区句 + 架构红线句：
+参数 = 固定技术栈句 + 本节模块落位 + 测试策略句 + 语法禁区句 + 注释约定句 + 架构红线句：
 
 **固定技术栈句**：`JDK 21 + Spring Boot 3.x + Spring AI Alibaba（动手前先跑 mvn dependency:tree 确认锁定 BOM 里目标依赖存在）、SQLite + Spring Data JPA。凭证走环境变量占位，不落明文。SQLite 用手工建表脚本，不依赖 hibernate.ddl-auto=update。`
 
@@ -126,6 +126,8 @@ $ARGUMENTS
 
 **语法禁区句**：`避开 P3C/ASM 解析不了的 Java 18+ 语法形态（如增强 switch 的 default -> 写法），静态检查是构建门禁。`
 
+**注释约定句**（每节必带，写入 plan 的约束）：`所有 Java 方法（含 private、构造器、测试方法）必须带中文 Javadoc 注释，说明方法用途，必要时补充"为什么"；类带中文类注释。`
+
 **架构红线句**（每节必带，对应第 7 步 H4 不变量，plan 阶段就要体现，不留到验收才发现）：`Spring AI 只用 Provider 抽象、协议转换与 @Tool schema 生成，必须禁用其自动 tool 执行，tool 调度完全由 ReActLoop + ToolExecutor 控制，否则 tool 会被调两次；同步阻塞 + 虚拟线程，不引入 Reactor/CompletableFuture/自建线程池；不改 constitution。`
 
 ## 第 5 步：/speckit-tasks + 固定软停点
@@ -139,7 +141,8 @@ $ARGUMENTS
 implement 期间逐任务执行，附加门禁：
 
 - **写前**（H3）：涉及第三方 API 的任务，先在本地依赖核实方法存在；核实不到 → 软门禁。
-- **写中**（H1/H5）：只创建交付物点名的对外概念；已定字面量逐字保真；异常不吞（catch 必落审计/日志或上抛）；不建文档外抽象层；注释只写"为什么"。
+- **引依赖前**（CVE 门禁）：新增或升级任何依赖（尤其 Spring AI、provider starter 等新引入的库），先查 Maven Central 取该大版本线**已发布的最新补丁版**，不要沿用课件/BOM 里的旧版本号（第 16 节踩过：Spring AI 1.1.2 带 15 个 CVSS≥7 的 CVE，CI 的 OWASP dependency-check 才拦下；升到 1.1.8 仍剩 3 个，修复在未发布的 1.1.9）。`./mvnw clean verify` **不含** dependency-check（CI 里 `-Psecurity` 才跑，需 `NVD_API_KEY`）。升到最新补丁仍有 CVSS≥7 → 软门禁：停下报告，逐条评估可达性后才可在 `config/dependency-check-suppressions.xml` 抑制（写明不可达理由、绑定具体版本、带 `until` 过期日，并注明"修复版本发布后须升级并删除"）；升大版本线若违反 constitution（如 Spring Boot 4）不得自行升。
+- **写中**（H1/H5）：只创建交付物点名的对外概念；已定字面量逐字保真；异常不吞（catch 必落审计/日志或上抛）；不建文档外抽象层；**每个方法（含 private、构造器、测试方法）必须有中文注释**（Javadoc 形式，说明用途；非显而易见处补"为什么"），类也要有中文类注释，缺一不过。
 - **写后**（任务级 DoD）：实现与测试一起落地，跑该模块测试，红了当场修，不攒到最后。
 - 课件"验收 harness"里**写出代码的关键回归测试必须原样落地**（中文方法名风格保持一致）。
 
@@ -147,9 +150,9 @@ implement 期间逐任务执行，附加门禁：
 
 全部满足才可宣布本节完成，逐项把证据写进验收报告：
 
-1. `mvn clean verify` 全绿（含 P3C/SpotBugs/FindSecBugs/PMD），贴关键输出；
+1. `mvn clean verify` 全绿（含 P3C/SpotBugs/FindSecBugs/PMD），贴关键输出；若本节改动了 pom 依赖，另需确认已按"引依赖前"核对 CVE，并提醒用户 PR 的 CI dependency-check 才是最终判定；
 2. 课件 harness 映射表的每个测试类存在且非空，关键回归测试逐个对号；
-3. "本节交付物"逐项 ls/grep 存在性核对；
+3. "本节交付物"逐项 ls/grep 存在性核对；并抽查本节新增/修改的 Java 文件，**每个方法都有中文注释**（缺失当场补齐再验收）；
 4. **前序节全部测试回归绿**（跨节契约证据）；
 5. **H4 六条全局不变量逐条自查**：①涉外 IO 首行过 `Sandbox.enforce`（Sandbox 未就位的节：留调用位注明 24 节接线）②LLM 调用成败都落 `llm_calls`、工具执行成败都落 `tool_invocations` ③grep 无明文 key ④`session_id` 只在 `SessionManager` 内拼接 ⑤无 Reactor/`CompletableFuture`/自建线程池 ⑥无 Spring AI 自动工具执行路径；
 6. 验收报告收尾：以上证据 + 课件"做完怎么验"的**剩余人工项清单**（真模型/真 webhook/冒烟等），明确告知用户"harness 已判卷，这几项等你人工过"。

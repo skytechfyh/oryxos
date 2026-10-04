@@ -40,6 +40,8 @@ provider / memory / tool 等业务模块多为待开发骨架,按 `docs/Technica
 - 代码风格 Google 格式 + 阿里 P3C;注释使用中文。SpotBugs 排除项必须写明理由。
 - 依赖版本集中在根 `pom.xml` 的 properties。多个版本被刻意固定以消除 CVE(Tomcat、log4j、swagger-ui、spring-ai-alibaba security-fix 等),升级前确认不会回退;被抑制的 CVE 在 `config/dependency-check-suppressions.xml` 中附理由与过期日。
 - 开发流程:主体阶段按 Spec-Kit(constitution → specify → plan → tasks → implement)按 user story 拆分,每个 story 完成后须有可演示 Demo;增量阶段用手动提示词。不允许 AI 自行修改 constitution。详见 `docs/AiProgrammingGuide.md`。
+- 新增或升级依赖前,先查 Maven Central 取该版本线已发布的最新补丁版;`./mvnw verify` 不含 dependency-check(CI 的 `-Psecurity` 才跑),升级后仍有 CVSS≥7 时须逐条评估可达性,再在抑制清单中附理由、绑定版本、写过期日,不得直接抑制了事。
+- 每个 Java 方法(含 private、构造器、测试方法)必须有中文 Javadoc 注释,类带中文类注释。
 - 提交信息沿用 `type(scope): 中文描述` 风格,如 `fix(security): ...`。
 - `.idea/` 不入库。
 
