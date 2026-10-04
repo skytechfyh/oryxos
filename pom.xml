@@ -34,8 +34,8 @@
     <!-- springdoc 自带的 swagger-ui 5.32.2 内含 DOMPurify 3.3.2(CVE-2026-65898),5.32.15 内含 3.4.13 -->
     <swagger-ui.version>5.32.15</swagger-ui.version>
     <spring-ai-alibaba.version>1.1.2.4-security-fix</spring-ai-alibaba.version>
-    <!-- Alibaba BOM 不管理 Spring AI 本体与 provider starter,须单独引入;版本对齐 Alibaba 1.1.2.x 所基于的 1.1.x -->
-    <spring-ai.version>1.1.2</spring-ai.version>
+    <!-- Alibaba BOM 不管理 Spring AI 本体与 provider starter,须单独引入;升至 1.1.8 以消除 1.1.2 上 CVSS≥7 的 Spring AI CVE -->
+    <spring-ai.version>1.1.8</spring-ai.version>
     <sqlite-jdbc.version>3.53.4.0</sqlite-jdbc.version>
     <picocli.version>4.7.7</picocli.version>
     <snakeyaml.version>2.4</snakeyaml.version>
