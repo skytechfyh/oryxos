@@ -35,4 +35,12 @@
     <Class name="io.oryxos.channel.cli.CliChannel"/>
     <Bug pattern="EI_EXPOSE_REP2"/>
   </Match>
+  <!--
+    WebhookNotifyAdapter 的 RestClient 由 Spring 注入(notifyRestClient),持有调用方给的客户端正是设计本意:
+    RestClient 是线程安全、不可变的服务对象,适配器只用它发请求、不向外暴露也不替换,拷贝它没有意义。
+  -->
+  <Match>
+    <Class name="io.oryxos.tool.notify.WebhookNotifyAdapter"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
 </FindBugsFilter>
