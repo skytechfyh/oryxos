@@ -12,5 +12,13 @@
   <name>oryxos-tool</name>
   <dependencies>
     <dependency><groupId>io.oryxos</groupId><artifactId>oryxos-core</artifactId></dependency>
+    <!-- notify 的 webhook 实现用 RestClient 同步发送;版本由 Boot BOM 管理 -->
+    <dependency><groupId>org.springframework</groupId><artifactId>spring-web</artifactId></dependency>
+    <!-- RestClient 把 Map 序列化成 JSON 需要 Jackson 消息转换器;版本由 Boot BOM 管理 -->
+    <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId></dependency>
+    <!-- @Component / @Configuration / @Bean;oryxos-tool 里它原本只以 test scope 可见 -->
+    <dependency><groupId>org.springframework</groupId><artifactId>spring-context</artifactId></dependency>
+    <!-- 本地假 webhook,仅测试;版本在根 pom 的 mockwebserver.version(Boot BOM 不管理 okhttp) -->
+    <dependency><groupId>com.squareup.okhttp3</groupId><artifactId>mockwebserver</artifactId><scope>test</scope></dependency>
   </dependencies>
 </project>
