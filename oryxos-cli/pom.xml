@@ -12,6 +12,10 @@
   <name>oryxos-cli</name>
   <dependencies>
     <dependency><groupId>io.oryxos</groupId><artifactId>oryxos-core</artifactId></dependency>
+    <dependency><groupId>io.oryxos</groupId><artifactId>oryxos-channel-cli</artifactId></dependency>
     <dependency><groupId>info.picocli</groupId><artifactId>picocli</artifactId></dependency>
+    <!-- 仅为 ConfigurableApplicationContext:重命令经注入的启动函数拿到容器后取 Bean,cli 不依赖 boot -->
+    <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot</artifactId></dependency>
+    <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
   </dependencies>
 </project>

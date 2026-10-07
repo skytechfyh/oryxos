@@ -60,8 +60,9 @@ JDK 21 + Spring Boot 3.5 的企业级单体,Maven 多模块,打包为单个 fat 
 
 ```bash
 ./mvnw clean verify                   # 测试 + 全部代码检查(Maven Wrapper 固定 3.9.16)
-java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar
-java -jar ... --spring.profiles.active=prod   # JSON 日志
+java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar serve
+java -jar ... serve --spring.profiles.active=prod   # JSON 日志
+java -jar ... --help                  # 12 个子命令:init / status / chat / serve / gateway / profile / provider / tool / session
 ```
 
 | 地址 | 说明 |

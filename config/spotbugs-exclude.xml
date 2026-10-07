@@ -10,4 +10,29 @@
     <Class name="io.oryxos.web.TraceIdFilter"/>
     <Bug pattern="HRS_REQUEST_PARAMETER_TO_HTTP_HEADER,SERVLET_HEADER"/>
   </Match>
+  <!--
+    会话实体 io.oryxos.storage.Session 与 core 的 Session 接口同名:实体名是课件与技术方案 9.2 的既定字面量,
+    且分属不同包、实现处一律用全限定名引用接口,不会混淆;为过检查而改名会违反"不改已定字面量"。
+  -->
+  <Match>
+    <Class name="io.oryxos.storage.Session"/>
+    <Bug pattern="NM_SAME_SIMPLE_NAME_AS_INTERFACE"/>
+  </Match>
+  <!--
+    Session.messages() 按第 17 节 Session 接口契约返回可变的消息序列:ReActLoop 与 PromptBuilder 直接读写它来累积历史,
+    返回副本会让累积失效。该列表只在单次对话处理的线程内使用,不跨线程共享。
+  -->
+  <Match>
+    <Class name="io.oryxos.storage.Session"/>
+    <Method name="messages"/>
+    <Bug pattern="EI_EXPOSE_REP"/>
+  </Match>
+  <!--
+    CliChannel 的输入输出流由构造器注入(生产环境是 System.in/out/err,测试里是内存流),持有调用方给的流正是设计本意:
+    通道只往里写、不向外暴露,也不会替换其内容。拷贝一个 PrintStream 没有意义。
+  -->
+  <Match>
+    <Class name="io.oryxos.channel.cli.CliChannel"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
 </FindBugsFilter>

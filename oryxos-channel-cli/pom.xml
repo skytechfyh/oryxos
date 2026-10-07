@@ -12,5 +12,6 @@
   <name>oryxos-channel-cli</name>
   <dependencies>
     <dependency><groupId>io.oryxos</groupId><artifactId>oryxos-core</artifactId></dependency>
+    <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>
   </dependencies>
 </project>

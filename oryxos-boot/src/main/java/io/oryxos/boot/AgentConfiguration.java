@@ -21,9 +21,9 @@ import org.springframework.context.annotation.Lazy;
 /**
  * 启动接线:把 ReAct 相关组件装配成可用的 {@link AgentService}。
  *
- * <p>整个配置类是懒加载的:{@link ToolRegistry} 与 {@link SessionManager} 的实现分别由第 20、18 节交付,在此之前容器里没有这两个
- * Bean。懒加载让应用照常启动,只有真正有人取 AgentService 时才解析依赖;两节落地后无需改这里。不用 {@code @ConditionalOnBean},因为它对 Bean
- * 注册顺序敏感,模块增多后不可靠。
+ * <p>整个配置类是懒加载的:{@link ToolRegistry} 的实现由第 20 节交付,在此之前容器里没有这个 Bean({@link SessionManager} 已由第 18 节的
+ * {@code JpaSessionManager} 提供)。懒加载让应用照常启动,只有真正有人取 AgentService 时才解析依赖;第 20 节落地后无需改这里。 不用
+ * {@code @ConditionalOnBean},因为它对 Bean 注册顺序敏感,模块增多后不可靠。
  */
 @Lazy
 @Configuration

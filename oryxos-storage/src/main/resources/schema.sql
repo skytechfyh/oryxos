@@ -32,3 +32,18 @@ CREATE TABLE IF NOT EXISTS tool_invocations (
 );
 
 CREATE INDEX IF NOT EXISTS idx_tool_invocations_session_id ON tool_invocations (session_id);
+
+-- 会话:元数据 + 整段对话历史(JSON 序列化后存一列,核心阶段不按条拆表)。
+-- session_id 由 SessionManager 按 渠道+用户+Agent 名唯一生成,是全表唯一身份;
+-- status 取 active / archived;archived_at 仅存储,自动归档不在本阶段范围。
+CREATE TABLE IF NOT EXISTS sessions (
+  session_id     TEXT PRIMARY KEY,
+  profile_name   TEXT NOT NULL,
+  channel        TEXT NOT NULL,
+  user_id        TEXT NOT NULL,
+  messages_json  TEXT NOT NULL,
+  status         TEXT NOT NULL,
+  created_at     TEXT NOT NULL,
+  last_active_at TEXT NOT NULL,
+  archived_at    TEXT
+);

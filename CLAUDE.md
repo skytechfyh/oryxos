@@ -8,7 +8,7 @@ OryxOS:分布式 AI Agent OS(运行 Agent 的底座)。JDK 21 + Spring Boot 3.5 
 ./mvnw clean verify                  # 测试 + 全部代码检查(Maven Wrapper 固定 3.9.16)
 ./mvnw spotless:apply                # 自动修复 Google 格式
 ./mvnw -pl oryxos-core -am verify    # 只构建某个模块及其依赖
-java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar [--spring.profiles.active=prod]
+java -jar oryxos-boot/target/oryxos-boot-0.1.0-SNAPSHOT.jar serve [--spring.profiles.active=prod]  # 无子命令只打印帮助
 ./mvnw verify -Psecurity             # OWASP Dependency-Check,需环境变量 NVD_API_KEY(CI 执行)
 git config core.hooksPath .githooks  # 启用 pre-commit
 ```
